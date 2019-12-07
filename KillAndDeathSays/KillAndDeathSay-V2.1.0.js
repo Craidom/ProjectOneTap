@@ -49,7 +49,7 @@ function initUI() {
 }
 
 function modeCheck() {
-    var mode = (get.state("Select Mode(s)")).toString(2).split("").reverse().map(Number);
+    var mode = get.state("Select Mode(s)").toString(2).split("").reverse().map(Number);
     if (mode[0]) {
         if (Entity.IsBot(getPlayerID("victim")) && Entity.IsLocalPlayer(getPlayerID("attacker"))) botSay(getPlayerID("victim"));
     }
@@ -60,12 +60,12 @@ function modeCheck() {
     }
     if (mode[2]) {
         if (Entity.IsLocalPlayer(getPlayerID("attacker"))) {
-            killSay((get.state("Kill: Include Victim Name") ? getPlayerName(getPlayerID("victim")) + " " : ""), getPlayerWeapon(getPlayerID("attacker")));
+            killSay((get.state("Kill: Include Victim Name") ? "Hey " + getPlayerName(getPlayerID("victim")) + ", " : ""), getPlayerWeapon(getPlayerID("attacker")));
         }
     }
     if (mode[3]) {
         if (Entity.IsLocalPlayer(getPlayerID("attacker"))) return;
-        if (Entity.IsLocalPlayer(getPlayerID("attacker"))) teamSay(getPlayerName(getPlayerID("victim")), getPlayerName(getPlayerID("attacker")));
+        if (Entity.IsLocalPlayer(getPlayerID("attacker"))) teamSay((get.state("Kill: Include Victim Name") ? getPlayerName(getPlayerID("victim")) + " " : ""), getPlayerName(getPlayerID("attacker")));
     }
 }
 
@@ -111,9 +111,11 @@ function killSay(victimName, weaponName) {
             break;
         case 2:
             if (Event.GetInt("headshot")) {
-              Global.ExecuteCommand("say 1");
+                Global.ExecuteCommand("say "
+                    + victimName + cycleRoasts("hitboxHead"));
             } else {
-              Global.ExecuteCommand("say Ouuu did you like that baim? pls dont get mad.");
+                Global.ExecuteCommand("say "
+                    + victimName + cycleRoasts("hitboxBody"));
             }
         case 3:
             Global.ExecuteCommand("say "
@@ -134,7 +136,9 @@ function killSay(victimName, weaponName) {
     }
 }
 
+var b = 0;
 var d = 0;
+var h = 0;
 var k = 0;
 function cycleRoasts(roast) {
     var deathRoasts = [
@@ -159,6 +163,16 @@ function cycleRoasts(roast) {
         'When was your last time you got a kill?',
         'You\'re a grey sprinkle on a rainbow cupcake.'
     ];
+    var hitboxHeadshotRoasts = [
+        'OneTap',
+        'One',
+        'tylerONE'
+    ];
+    var hitboxBodyRoasts = [
+        'Too Slow.',
+        'Ouu I\'m sorry, you were not fast enough.',
+        'my Baim is better than yours.'
+    ];
     switch (roast) {
         case "death":
             if (d > deathRoasts.length - 2) {
@@ -168,6 +182,7 @@ function cycleRoasts(roast) {
                 d++;
                 return deathRoasts[d];
             }
+            break;
         case "kill":
             if (k > killRoasts.length - 2) {
                 k = 0;
@@ -176,9 +191,26 @@ function cycleRoasts(roast) {
                 k++;
                 return killRoasts[k];
             }
-
+            break;
+        case "hitboxHead":
+            if (h > hitboxHeadshotRoasts.length - 2) {
+                h = 0;
+                return hitboxHeadshotRoasts[h];
+            } else {
+                h++;
+                return hitboxHeadshotRoasts[h];
+            }
+            break;
+        case "hitboxBody":
+            if (b > hitboxBodyRoasts.length - 2) {
+                b = 0;
+                return hitboxBodyRoasts[b];
+            } else {
+                b++;
+                return hitboxBodyRoasts[b];
+            }
+            break;
     }
-
 }
 
 function teamSay(victimName, attackerName) {

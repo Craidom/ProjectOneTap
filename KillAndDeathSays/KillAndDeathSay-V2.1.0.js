@@ -166,6 +166,7 @@ function cycleRoasts(roast) {
     var hitboxHeadshotRoasts = [
         'OneTap',
         'One',
+        '1',
         'tylerONE'
     ];
     var hitboxBodyRoasts = [

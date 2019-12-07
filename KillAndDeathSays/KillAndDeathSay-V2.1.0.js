@@ -65,7 +65,7 @@ function modeCheck() {
     }
     if (mode[3]) {
         if (Entity.IsLocalPlayer(getPlayerID("attacker"))) return;
-        if (Entity.IsLocalPlayer(getPlayerID("attacker"))) teamSay((get.state("Kill: Include Victim Name") ? getPlayerName(getPlayerID("victim")) + " " : ""), getPlayerName(getPlayerID("attacker")));
+        teamSay((get.state("Kill: Include Victim Name") ? getPlayerName(getPlayerID("victim")) + " " : ""), getPlayerName(getPlayerID("attacker")));
     }
 }
 

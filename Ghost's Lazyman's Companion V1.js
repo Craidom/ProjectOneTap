@@ -233,7 +233,7 @@ var menu = {
                 UI.SetEnabled("Whitelist ID: " + i, false);
             }
             for (var i = 1; i <= id.length; i++) {
-                UI.SetEnabled("Whitelist ID: " + i, true);
+                UI.SetEnabled("Whitelist ID: " + id[i], true);
             }
         }
         menu.update.bomb(menuSelection == 3 ? true : false);

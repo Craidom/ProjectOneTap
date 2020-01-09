@@ -30,9 +30,6 @@ function main() {
     Cheat.RegisterCallback("Draw", "iHateYou.rage");
     Global.RegisterCallback("vote_options", "whoVoted.voteCasted");
     Global.RegisterCallback("vote_cast", "whoVoted.voteChoice");
-
-
-
 }
 
 //Simplify stuff lol

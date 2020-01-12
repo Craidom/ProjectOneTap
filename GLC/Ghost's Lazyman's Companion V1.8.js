@@ -1,5 +1,5 @@
 /*
-GhostDaSnipa's Lazyman Companion
+GhostDaSnipa's Lazyman Companion V1.8
 updated 11 January 2020 18:24 PST
 */
 

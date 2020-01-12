@@ -1006,7 +1006,11 @@ var iHateYou = {
         }
     },
     killOnlyTarget(playerID, minDMG) {
-        if (!minDMG) return;
+        if (!get.ui.value("IHY: Min Dmg") == 0){
+            if (!minDMG) {
+                return;
+            }
+        }
         var target = Entity.GetHitboxPosition(playerID, 1)// Using neck for more consistent kills
         var myEyePos = Entity.GetEyePosition(Entity.GetLocalPlayer());
         var myVec = [myEyePos[0], myEyePos[1], myEyePos[2]];

@@ -62,7 +62,27 @@ var get = {
       screenSize: Render.GetScreenSize()
 }
 
+var output = {
+    say(msg) {
+        Cheat.ExecuteCommand("say " + msg);
+    },
+    teamSay(msg) {
+        Cheat.ExecuteCommand("say_team " + msg);
+    },
+    print(msg) {
+        Cheat.Print(msg);
+    },
+    printChat(msg) {
+        Cheat.PrintChat(msg);
+    }
+};
+
 var menu = {
+    //values
+    getMode() {
+        return get.ui.mode("Activate Mode(s)");
+    },
+    //Functions
     init() {
         UI.AddMultiDropdown("Activate Mode(s)", [
             "Bomb Locater",
@@ -158,8 +178,6 @@ var menu = {
     },
     logic() {
         if (!UI.IsMenuOpen()) return;
-        if (!UI.IsMenuOpen()) return;
-        var mode = get.ui.mode("Activate Mode(s)");
         var menuSelection = get.ui.value("Show Menu(s)");
         menu.update.aimbot(menuSelection == 1 ? true : false); //Aimbot
         menu.update.bombLocater(menuSelection == 2 ? true : false); //BombLocater
@@ -167,6 +185,8 @@ var menu = {
         menu.update.tracers(menuSelection == 4 ? true : false); //Tracers
 
     },
+
+    //Other Objects
     update: {
         aimbot(state) {
             UI.SetEnabled("Aimbot: Aim Through Wall", state);
@@ -188,20 +208,74 @@ var menu = {
             }
             if (get.ui.value("Hitlist: Refresh")) {
                 UI.SetValue("Hitlist: Refresh", false);
-                hitList.refreshList();
+                hitList.refresh();
             }
         },
         tracers(state) {
-            UI.SetEnabled("Tracers: Draw on Visible");
-            UI.SetEnabled("Tracers: Line Colour");
-            UI.SetEnabled("Tracers: Text Colour");
-            UI.SetEnabled("Tracers: Text Size", 1, 48);
+            UI.SetEnabled("Tracers: Draw on Visible", state);
+            UI.SetEnabled("Tracers: Line Colour", state);
+            UI.SetEnabled("Tracers: Text Colour", state);
+            UI.SetEnabled("Tracers: Text Size", state);
         }
 
     }
 
 }
 
+var hitList = {
+    refresh() {
+        var players = get.entity.players();
+        output.printChat(" \x0C=================================");
+        for (var i = 0; i < players.length; i++) {
+            if (get.entity.isMe(players[i])) {
+                output.printChat(" \x03ID:" + players[i] + " > " + get.entity.name(players[i]));
+            } else if (get.entity.isEnemy(players[i])) {
+                output.printChat(" \x02ID:" + players[i] + " > " + get.entity.name(players[i]));
+            } else if (!get.entity.isEnemy(players[i])) {
+                output.printChat(" \x04ID:" + players[i] + " > " + get.entity.name(players[i]));
+            }
+        }
+        output.printChat(" \x0C=================================");
+        return players;
+    }
+}
+
 function main() {
+    menu.init();
+    Cheat.RegisterCallback("Draw", "menu.logic");
 
 }
+
+var tracers = {
+    trace() {
+        var mode = menu.getMode();
+        if (!mode[1]) return;
+        var playerID = get.entity.players();
+        var localID = Entity.GetLocalPlayer();
+        var localEyePos = Entity.GetEyePosition(localID);
+        var rgba = UI.GetColor("Script items", "Tracers: Line Colour");
+        var rgba2 = UI.GetColor("Script items", "Tracers: Text Colour");
+        for (var i = 0; i < playerID.length; i++) {
+            if (!get.ui.value("Player ID: : " + playerID[i])) {
+                continue;
+            }
+            var headPos = Entity.GetHitboxPosition(playerID[i], 0);
+            var bullet = Trace.Line(meID, meEyePos, headPos);
+            if (get.ui.value("Tracers: Draw on Visible")) {
+                if (!(bullet[1] > 0.7)) {
+                    continue;
+                }
+            }
+            if (Entity.IsAlive(playerID[i]) && !Entity.IsDormant(playerID[i])) {
+                var enemyPos = Entity.GetRenderOrigin(playerID[i]);
+                var enemyPosScreen = Render.WorldToScreen(enemyPos);
+                var myPos = Entity.GetRenderOrigin(meID);
+                var myPosScreen = Render.WorldToScreen(myPos);
+                Render.Line(enemyPosScreen[0], enemyPosScreen[1],  myPosScreen[0], myPosScreen[1], [rgba[0], rgba[1], rgba[2], rgba[3]]);
+                Render.String(enemyPosScreen[0], enemyPosScreen[1], 0, Entity.GetName(playerID[i]), [rgba2[0], rgba2[1], rgba2[2], rgba2[3]], get.ui.value("ISY: Text Size"));
+            }
+
+        }
+    }
+}
+main();

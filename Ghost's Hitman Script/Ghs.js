@@ -60,7 +60,7 @@ var get = {
           }
       },
       screenSize: Render.GetScreenSize()
-}
+};
 
 var output = {
     say(msg) {
@@ -183,10 +183,7 @@ var menu = {
         menu.update.bombLocater(menuSelection == 2 ? true : false); //BombLocater
         menu.update.hitList(menuSelection == 3 ? true : false); //HitList
         menu.update.tracers(menuSelection == 4 ? true : false); //Tracers
-
     },
-
-    //Other Objects
     update: {
         aimbot(state) {
             UI.SetEnabled("Aimbot: Aim Through Wall", state);
@@ -202,7 +199,7 @@ var menu = {
         hitList(state) {
             UI.SetEnabled("Hitlist: Refresh", state);
             if (!state) {
-                for (var i = 1; i <= 20; i++) {
+                for (var i = 1; i <= 35; i++) {
                     UI.SetEnabled("Player ID: " + i, false);
                 }
             }
@@ -217,10 +214,8 @@ var menu = {
             UI.SetEnabled("Tracers: Text Colour", state);
             UI.SetEnabled("Tracers: Text Size", state);
         }
-
     }
-
-}
+};
 
 var hitList = {
     refresh() {
@@ -236,15 +231,12 @@ var hitList = {
             }
         }
         output.printChat(" \x0C=================================");
+        for (var i = 0; i < players.length; i++) {
+            UI.SetEnabled("Player ID: " + players[i], true);
+        }
         return players;
     }
-}
-
-function main() {
-    menu.init();
-    Cheat.RegisterCallback("Draw", "menu.logic");
-
-}
+};
 
 var tracers = {
     trace() {
@@ -256,26 +248,63 @@ var tracers = {
         var rgba = UI.GetColor("Script items", "Tracers: Line Colour");
         var rgba2 = UI.GetColor("Script items", "Tracers: Text Colour");
         for (var i = 0; i < playerID.length; i++) {
-            if (!get.ui.value("Player ID: : " + playerID[i])) {
-                continue;
-            }
+            target.setID(playerID[i]);
+            if (!get.ui.value("Player ID: " + playerID[i]) || !Entity.IsValid(playerID[i]) || !Entity.IsAlive(playerID[i])) continue;
             var headPos = Entity.GetHitboxPosition(playerID[i], 0);
-            var bullet = Trace.Line(meID, meEyePos, headPos);
+            var bullet = Trace.Line(localID, localEyePos, headPos);
             if (get.ui.value("Tracers: Draw on Visible")) {
-                if (!(bullet[1] > 0.7)) {
-                    continue;
+                try {
+                    if (!Entity.IsDormant(playerID[i]) && target.isVisible) {
+                        var log = log;
+                    } else {
+                        continue;
+                    }
+                } catch (error) {
+                    var useless = error;
                 }
             }
             if (Entity.IsAlive(playerID[i]) && !Entity.IsDormant(playerID[i])) {
                 var enemyPos = Entity.GetRenderOrigin(playerID[i]);
                 var enemyPosScreen = Render.WorldToScreen(enemyPos);
-                var myPos = Entity.GetRenderOrigin(meID);
-                var myPosScreen = Render.WorldToScreen(myPos);
-                Render.Line(enemyPosScreen[0], enemyPosScreen[1],  myPosScreen[0], myPosScreen[1], [rgba[0], rgba[1], rgba[2], rgba[3]]);
-                Render.String(enemyPosScreen[0], enemyPosScreen[1], 0, Entity.GetName(playerID[i]), [rgba2[0], rgba2[1], rgba2[2], rgba2[3]], get.ui.value("ISY: Text Size"));
+                var localPos = Entity.GetRenderOrigin(localID);
+                var localPosScreen = Render.WorldToScreen(localPos);
+                Render.Line(enemyPosScreen[0], enemyPosScreen[1],  localPosScreen[0], localPosScreen[1], [rgba[0], rgba[1], rgba[2], rgba[3]]);
+                Render.String(enemyPosScreen[0], enemyPosScreen[1], 0, Entity.GetName(playerID[i]), [rgba2[0], rgba2[1], rgba2[2], rgba2[3]], get.ui.value("Tracers: Text Size"));
             }
-
         }
     }
+};
+
+var target = {
+    id: 0,
+    isVisible: false,
+    canShoot: false,
+    checkVisible() {
+        try {
+            var localID = Entity.GetLocalPlayer();
+            var localEyePos = Entity.GetEyePosition(localID);
+            var headPos = Entity.GetHitboxPosition(target.id, 0);
+            var bullet = Trace.Line(localID, localEyePos, headPos);
+            if (bullet[1] > 0.7) {
+                target.isVisible = true;
+            } else {
+                target.isVisible = false;
+            }
+        } catch (e) {
+            target.isVisible = true;
+        }
+    },
+    setID(id) {
+        target.id = id;
+    }
 }
+
+
+function main() {
+    menu.init();
+    Cheat.RegisterCallback("Draw", "menu.logic");
+    Cheat.RegisterCallback("Draw", "tracers.trace");
+    Cheat.RegisterCallback("CreateMove", "target.checkVisible");
+}
+
 main();
